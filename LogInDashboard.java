@@ -1,11 +1,10 @@
 
 package Group8_Final;
 
-import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import javax.swing.JOptionPane;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 
 public class LogInDashboard extends javax.swing.JFrame {
@@ -25,36 +24,29 @@ public class LogInDashboard extends javax.swing.JFrame {
     return new String(chars);
 }
 
-      private boolean validateLogin(String username, String password) {
-        File file = new File("C:\\Users\\sagui\\OneDrive\\Desktop\\CREDENTIALS.txt");
-        if (!file.exists()) {
-            JOptionPane.showMessageDialog(this, "User database not found.");
-            return false;
-        }
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 2) {
-                    String storedUsername = parts[0];
-                    String encryptedPassword = parts[1];
-                    if (storedUsername.equalsIgnoreCase(username)) {
-                        String decryptedPassword = decryptMessage(encryptedPassword, key);
-                        if (decryptedPassword.equals(password)) {
-                            return true;  // if sakto ang credentials
-                        } else {
-                            return false; // if sayop ang passworddd
-                        }
-                    }
-                }
-            }
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Error reading user data: " + e.getMessage());
-        }
+private boolean validateLogin(String username, String password) {
+    try {
+        Connection con = ConnectionDB.getConnection();
 
-        return false; // if di makita ang username
+        String query = "SELECT * FROM users WHERE username=? AND password=?";
+        PreparedStatement pst = con.prepareStatement(query);
+
+        pst.setString(1, username);
+        pst.setString(2, password);
+
+        ResultSet rs = pst.executeQuery();
+
+        return rs.next();
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage());
     }
+
+    return false;
+}
+
+    
       
     /**
      * This method is called from within the constructor to initialize the form.
