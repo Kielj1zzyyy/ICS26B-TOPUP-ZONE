@@ -4,13 +4,10 @@
  */
 package Group8_Final;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+
 import javax.swing.JOptionPane;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
 public class SignUp extends javax.swing.JFrame {
 
@@ -39,58 +36,52 @@ public class SignUp extends javax.swing.JFrame {
 }
 
     private void handleSignUp(String username, String password) {
+
     if (username.isEmpty() || password.isEmpty()) {
         JOptionPane.showMessageDialog(this, "Please fill all fields.");
         return;
     }
 
     if (isUsernameTaken(username)) {
-        JOptionPane.showMessageDialog(this, "Username already exists! Please choose another.");
+        JOptionPane.showMessageDialog(this, "Username already exists!");
         return;
     }
 
-    if (saveUserToFile(username, password)) {
+    if (saveUserToDatabase(username, password)) {
         JOptionPane.showMessageDialog(this, "Sign Up Successful!");
-        jTextField1.setText("");
-        jPasswordField1.setText("");
-    } else {
-        JOptionPane.showMessageDialog(this, "Error saving user data.");
     }
 }
 
 private boolean isUsernameTaken(String username) {
-    File file = new File("C:\\Users\\sagui\\OneDrive\\Desktop\\CREDENTIALS.txt");
-    if (!file.exists()) return false;
+    try {
+        Connection con = ConnectionDB.getConnection();
+        String query = "SELECT * FROM users WHERE username=?";
+        PreparedStatement pst = con.prepareStatement(query);
+        pst.setString(1, username);
 
-    try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-        String line;
-        while ((line = br.readLine()) != null) {
-            String[] parts = line.split(",");
-            if (parts.length > 0 && parts[0].equalsIgnoreCase(username)) {
-                return true;
-            }
-        }
-    } catch (IOException e) {
-        e.printStackTrace();
+        return pst.executeQuery().next();
+
+    } catch (Exception e) {
+        return false;
     }
-    return false;
 }
 
-private boolean saveUserToFile(String username, String password) {
-    int key = 5;
-    String encryptedPassword = encryptMessage(password, key);
+private boolean saveUserToDatabase(String username, String password) {
+    try {
+        Connection con = ConnectionDB.getConnection();
+        String query = "INSERT INTO users(username, password) VALUES (?, ?)";
 
-    File file = new File("C:\\Users\\sagui\\OneDrive\\Desktop\\CREDENTIALS.txt");
+        PreparedStatement pst = con.prepareStatement(query);
+        pst.setString(1, username);
+        pst.setString(2, password);
 
-    try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
-        bw.write(username + "," + encryptedPassword);
-        bw.newLine();
-        bw.flush();
-        return true;  // <--- add this
-    } catch (IOException e) {
-        JOptionPane.showMessageDialog(this, "Error saving user data: " + e.getMessage());
-        return false; //
-}
+        pst.executeUpdate();
+        return true;
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage());
+        return false;
+    }
 }
 
 
