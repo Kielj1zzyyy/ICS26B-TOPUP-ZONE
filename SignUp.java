@@ -4,86 +4,70 @@
  */
 package Group8_Final;
 
-
 import javax.swing.JOptionPane;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class SignUp extends javax.swing.JFrame {
 
-    /**
-     * Creates new form SignUp
-     */
     public SignUp() {
         initComponents();
         this.setLocationRelativeTo(null);
     }
-    
-    public static String encryptMessage(String message, int key) {
-    char[] chars = message.toCharArray();
-    for (int i = 0; i < chars.length; i++) {
-        chars[i] += key;
-    }
-    return new String(chars);
-}
-
-    public static String decryptMessage(String encryptedMessage, int key) {
-    char[] chars = encryptedMessage.toCharArray();
-    for (int i = 0; i < chars.length; i++) {
-        chars[i] -= key;
-    }
-    return new String(chars);
-}
 
     private void handleSignUp(String username, String password) {
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill all fields.");
+            return;
+        }
 
-    if (username.isEmpty() || password.isEmpty()) {
-        JOptionPane.showMessageDialog(this, "Please fill all fields.");
-        return;
+        if (isUsernameTaken(username)) {
+            JOptionPane.showMessageDialog(this, "Username already exists!");
+            return;
+        }
+
+        if (saveUserToDatabase(username, password)) {
+            JOptionPane.showMessageDialog(this, "Sign Up Successful!");
+            jTextField1.setText("");
+            jPasswordField1.setText("");
+        }
     }
 
-    if (isUsernameTaken(username)) {
-        JOptionPane.showMessageDialog(this, "Username already exists!");
-        return;
+    private boolean isUsernameTaken(String username) {
+        String query = "SELECT username FROM users WHERE username=?";
+        try (Connection con = ConnectionDB.getConnection();
+             PreparedStatement pst = con.prepareStatement(query)) {
+            
+            pst.setString(1, username);
+            try (ResultSet rs = pst.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error checking username: " + e.getMessage());
+            return false;
+        }
     }
 
-    if (saveUserToDatabase(username, password)) {
-        JOptionPane.showMessageDialog(this, "Sign Up Successful!");
-    }
-}
-
-private boolean isUsernameTaken(String username) {
-    try {
-        Connection con = ConnectionDB.getConnection();
-        String query = "SELECT * FROM users WHERE username=?";
-        PreparedStatement pst = con.prepareStatement(query);
-        pst.setString(1, username);
-
-        return pst.executeQuery().next();
-
-    } catch (Exception e) {
-        return false;
-    }
-}
-
-private boolean saveUserToDatabase(String username, String password) {
-    try {
-        Connection con = ConnectionDB.getConnection();
+    private boolean saveUserToDatabase(String username, String password) {
         String query = "INSERT INTO users(username, password) VALUES (?, ?)";
+        try (Connection con = ConnectionDB.getConnection();
+             PreparedStatement pst = con.prepareStatement(query)) {
 
-        PreparedStatement pst = con.prepareStatement(query);
-        pst.setString(1, username);
-        pst.setString(2, password);
+            pst.setString(1, username);
+            pst.setString(2, password);
 
-        pst.executeUpdate();
-        return true;
-
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage());
-        return false;
+            pst.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage());
+            return false;
+        }
     }
-}
 
+    
+
+ 
 
 
     /**
