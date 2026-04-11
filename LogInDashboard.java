@@ -9,41 +9,41 @@ import java.sql.ResultSet;
 
 public class LogInDashboard extends javax.swing.JFrame {
 
-    private static final int key = 5;
+    private int userId;
     
-    public LogInDashboard() {
-        initComponents();
-        this.setLocationRelativeTo(null);
+    public LogInDashboard(){
+    initComponents();
+    this.setLocationRelativeTo(null);
     }
-    
-    public static String decryptMessage(String message, int key) {
-    char[] chars = message.toCharArray();
-    for (int i = 0; i < chars.length; i++) {
-        chars[i] -= key;
-    }
-    return new String(chars);
+
+    public LogInDashboard(int userId) {
+    initComponents();
+    this.setLocationRelativeTo(null);
+    this.userId = userId;
 }
 
 
-private boolean validateLogin(String username, String password) {
-    try {
-        Connection con = ConnectionDB.getConnection();
 
-        String query = "SELECT * FROM users WHERE username=? AND password=?";
-        PreparedStatement pst = con.prepareStatement(query);
+private int validateLogin(String username, String password) {
+    String query = "SELECT user_id FROM users WHERE username=? AND password=?";
+
+    try (Connection con = ConnectionDB.getConnection();
+         PreparedStatement pst = con.prepareStatement(query)) {
 
         pst.setString(1, username);
         pst.setString(2, password);
 
         ResultSet rs = pst.executeQuery();
 
-        return rs.next();
+        if (rs.next()) {
+            return rs.getInt("user_id");
+        }
 
     } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage());
+        JOptionPane.showMessageDialog(this, e.getMessage());
     }
 
-    return false;
+    return -1;
 }
 
     
@@ -317,26 +317,27 @@ private boolean validateLogin(String username, String password) {
     }// </editor-fold>//GEN-END:initComponents
 
     private void LogIn_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LogIn_ButtonActionPerformed
-        String enteredUsername = jTextField1.getText().trim();
-        String enteredPassword = new String(jPasswordField1.getPassword()).trim();
+        String username = jTextField1.getText().trim();
+        String password = new String(jPasswordField1.getPassword()).trim();
 
+    int id = validateLogin(username, password);
 
-    if (validateLogin(enteredUsername, enteredPassword)) {
-        JOptionPane.showMessageDialog(this, "Login successful!");
+    if (id != -1) {
+        JOptionPane.showMessageDialog(this, "Login Successful!");
 
-        Menu_Dashboard dashboard = new Menu_Dashboard();
-        dashboard.setLocationRelativeTo(null);
-        dashboard.setVisible(true);
+        Menu_Dashboard menu = new Menu_Dashboard(id); 
+        menu.setVisible(true);
         this.dispose();
+
     } else {
-        JOptionPane.showMessageDialog(this, "Invalid username or password.");
+        JOptionPane.showMessageDialog(this, "Invalid Username or Password!");
     }
     }//GEN-LAST:event_LogIn_ButtonActionPerformed
 
     private void CreateAcc_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CreateAcc_ButtonActionPerformed
-        SignUp signUp = new SignUp();
+       SignUp signUp = new SignUp();
         signUp.setVisible(true);
-        this.dispose();  
+        this.dispose();
     }//GEN-LAST:event_CreateAcc_ButtonActionPerformed
 
     /**
