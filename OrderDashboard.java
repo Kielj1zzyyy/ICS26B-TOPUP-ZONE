@@ -4,15 +4,13 @@
  */
 package Group8_Final;
 
-import java.io.FileWriter;
-import java.io.BufferedWriter;
-import java.io.IOException;
 import javax.swing.JOptionPane;
 import java.util.List;
 import java.util.ArrayList;
 import javax.swing.JComboBox;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 
 public class OrderDashboard extends javax.swing.JFrame {
@@ -20,49 +18,86 @@ public class OrderDashboard extends javax.swing.JFrame {
     /**
      * Creates new form OrderDashboard
      */
-    public OrderDashboard() {
+    
+    List<String> selectedGamesGlobal = new ArrayList<>();
+    
+        int userId;
+        public OrderDashboard(int userId) {
+           this.userId = userId;
         initComponents();
-        CHECKOUT.setEnabledAt(1, false); 
-        this.setLocationRelativeTo(null);
+          this.setLocationRelativeTo(null);
+    }
+        
+    public int getGameId(String gameName) {
+    int id = 0;
+
+    try {
+        Connection con = ConnectionDB.getConnection();
+
+        String query = "SELECT game_id FROM games WHERE game_name=?";
+        PreparedStatement pst = con.prepareStatement(query);
+        pst.setString(1, gameName);
+
+        ResultSet rs = pst.executeQuery();
+        if (rs.next()) {
+            id = rs.getInt("game_id");
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
     }
 
-    public class UserDetailsSaver {
+    return id;
+}
 
-    private static final String FILE_PATH = "C:\\Users\\sagui\\OneDrive\\Desktop\\PlayerDetails.txt";
+   public void saveOrder(String ign, String gameName, String amount, String payment) {
 
-   
-    public static void saveUserDetails(String ign, String id, String selectedGame) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_PATH, true))) {
-            writer.write("In-Game Name: " + ign);
-            writer.newLine();
-            writer.write("User ID: " + id);
-            writer.newLine();
-            writer.write("Selected Game: " + selectedGame);
-            writer.newLine();
-            writer.write("---------------------------");
-            writer.newLine();
-            
-            JOptionPane.showMessageDialog(null, "Details saved successfully!");
-            } catch (IOException e) {
-        JOptionPane.showMessageDialog(null, "Error saving details.", "Error", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
+    String query = "INSERT INTO orders(user_id, game_id, ign, amount, payment) VALUES (?, ?, ?, ?, ?)";
+
+    try (Connection con = ConnectionDB.getConnection();
+         PreparedStatement pst = con.prepareStatement(query)) {
+
+        int gameId = getGameId(gameName);
+
+        pst.setInt(1, userId);
+        pst.setInt(2, gameId);
+        pst.setString(3, ign);
+        pst.setString(4, amount);
+        pst.setString(5, payment);
+
+        pst.executeUpdate();
+
+        JOptionPane.showMessageDialog(this, "Order Saved Successfully!");
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, e.getMessage());
     }
 }
+   
         public void updatePriceComboBoxes(List<String> selectedGames) {
     
-        GamePrices1.removeAllItems();
-        GamePrices2.removeAllItems();
-        GamePrices3.removeAllItems();
+         GamePrices1.removeAllItems();
+    GamePrices2.removeAllItems();
+    GamePrices3.removeAllItems();
 
-    // Helper method to add prices for each combo box based on game
-    addPriceOptions(GamePrices1, selectedGames.size() > 0 ? selectedGames.get(0) : null);
-    addPriceOptions(GamePrices2, selectedGames.size() > 1 ? selectedGames.get(1) : null);
-    addPriceOptions(GamePrices3, selectedGames.size() > 2 ? selectedGames.get(2) : null);
+    GamePrices1.setEnabled(false);
+    GamePrices2.setEnabled(false);
+    GamePrices3.setEnabled(false);
 
-    GamePrices1.setEnabled(selectedGames.size() >= 0);
-    GamePrices2.setEnabled(selectedGames.size() >= 1);
-    GamePrices3.setEnabled(selectedGames.size() >= 2);
+    if (selectedGames.size() >= 1) {
+        addPriceOptions(GamePrices1, selectedGames.get(0));
+        GamePrices1.setEnabled(true);
+    }
+
+    if (selectedGames.size() >= 2) {
+        addPriceOptions(GamePrices2, selectedGames.get(1));
+        GamePrices2.setEnabled(true);
+    }
+
+    if (selectedGames.size() >= 3) {
+        addPriceOptions(GamePrices3, selectedGames.get(2));
+        GamePrices3.setEnabled(true);
+    }
 }
 
 // Extracted reusable method to add price items to a JComboBox
@@ -107,7 +142,7 @@ public class OrderDashboard extends javax.swing.JFrame {
             comboBox.addItem("250 Php - 499 Primogems");
             comboBox.addItem("500 Php - 1200 Primogems");
             break;
-        case "Call of Duty: Warzone":
+        case "Call of Duty Warzone":
             comboBox.addItem("80 Php - 120 CP");
             comboBox.addItem("150 Php - 270 CP");
             comboBox.addItem("300 Php - 600 CP");
@@ -228,28 +263,28 @@ public class OrderDashboard extends javax.swing.JFrame {
         jPanel2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(0, 102, 153), new java.awt.Color(0, 51, 153), new java.awt.Color(153, 153, 153), new java.awt.Color(204, 204, 204)));
 
         MLch.setFont(new java.awt.Font("Rockwell", 1, 18)); // NOI18N
-        MLch.setText("Mobile Legends: Bang Bang");
+        MLch.setText("Mobile Legends");
 
         codmch.setFont(new java.awt.Font("Rockwell", 1, 18)); // NOI18N
-        codmch.setText("Call of Duty: Mobile");
+        codmch.setText("Call of Duty Mobile");
 
         genshinch.setFont(new java.awt.Font("Rockwell", 1, 18)); // NOI18N
         genshinch.setText("Genshin Impact");
 
         pubgch.setFont(new java.awt.Font("Rockwell", 1, 18)); // NOI18N
-        pubgch.setText("Player Unknown's BattleGrounds");
+        pubgch.setText("PUBG");
 
         valoch.setFont(new java.awt.Font("Rockwell", 1, 18)); // NOI18N
-        valoch.setText("Valorant: Shooting Game");
+        valoch.setText("Valorant");
 
         warzonech.setFont(new java.awt.Font("Rockwell", 1, 18)); // NOI18N
         warzonech.setText("Call of Duty: Warzone");
 
         Proceed2ChooseAmount.setBackground(new java.awt.Color(204, 255, 204));
         Proceed2ChooseAmount.setText("Proceed to Choose Amount");
-        Proceed2ChooseAmount.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                Proceed2ChooseAmountMouseClicked(evt);
+        Proceed2ChooseAmount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                Proceed2ChooseAmountActionPerformed(evt);
             }
         });
 
@@ -270,9 +305,10 @@ public class OrderDashboard extends javax.swing.JFrame {
                     .addComponent(valoch)
                     .addComponent(warzonech)
                     .addComponent(codmch)
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(Proceed2ChooseAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 231, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(pubgch)))
+                    .addComponent(pubgch)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(100, 100, 100)
+                        .addComponent(Proceed2ChooseAmount, javax.swing.GroupLayout.PREFERRED_SIZE, 231, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(50, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -288,13 +324,13 @@ public class OrderDashboard extends javax.swing.JFrame {
                 .addComponent(genshinch)
                 .addGap(18, 18, 18)
                 .addComponent(pubgch)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(valoch)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(warzonech)
-                .addGap(47, 47, 47)
+                .addGap(39, 39, 39)
                 .addComponent(Proceed2ChooseAmount)
-                .addContainerGap(89, Short.MAX_VALUE))
+                .addContainerGap(103, Short.MAX_VALUE))
         );
 
         UserDetails.setBackground(new java.awt.Color(255, 204, 204));
@@ -575,7 +611,7 @@ public class OrderDashboard extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void BackDashboardMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_BackDashboardMouseClicked
-        Menu_Dashboard dashb = new Menu_Dashboard();
+        Menu_Dashboard dashb = new Menu_Dashboard(userId);
         dashb.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_BackDashboardMouseClicked
@@ -585,44 +621,6 @@ public class OrderDashboard extends javax.swing.JFrame {
         logind.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_LoggingOutMouseClicked
-
-    private void Proceed2ChooseAmountMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_Proceed2ChooseAmountMouseClicked
-         System.out.println("Proceed button clicked");
-    
-    String ign = IngameName.getText().trim();
-    String id = UserId.getText().trim();
-    String phone = PhoneNumber.getText().trim();
-    
-    if (ign.isEmpty() || id.isEmpty() || phone.isEmpty()) {
-    JOptionPane.showMessageDialog(this, "Please enter your IGN, User ID, and Phone Number.");
-    return;
-}
-
-        List<String> selectedGames = new ArrayList<>();
-    if (MLch.isSelected()) selectedGames.add("Mobile Legends");
-    if (codmch.isSelected()) selectedGames.add("Call of Duty Mobile");
-    if (valoch.isSelected()) selectedGames.add("Valorant");
-    if (pubgch.isSelected()) selectedGames.add("PUBG");
-    if (genshinch.isSelected()) selectedGames.add("Genshin Impact");
-    if (warzonech.isSelected()) selectedGames.add("Call of Duty: Warzone");
-
-    System.out.println("Selected games count: " + selectedGames.size());
-
-    if (selectedGames.size() == 0 || selectedGames.size() > 3) {
-        JOptionPane.showMessageDialog(null, "Please select 1 to 3 games only.");
-        return;
-    }
-
-    // Save details if needed
-    for (String game : selectedGames) {
-        UserDetailsSaver.saveUserDetails(ign, id, game);
-    }
-
-    updatePriceComboBoxes(selectedGames);
-
-    CHECKOUT.setEnabledAt(1, true);   // enable tab 1
-    CHECKOUT.setSelectedIndex(1);     // switch to tab 1 
-    }//GEN-LAST:event_Proceed2ChooseAmountMouseClicked
 
     private void finalizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_finalizeActionPerformed
          String ign = IngameName.getText().trim();
@@ -640,29 +638,33 @@ public class OrderDashboard extends javax.swing.JFrame {
     return;
 }
 
-
     if (ign.isEmpty() || id.isEmpty()) {
         JOptionPane.showMessageDialog(this, "Please enter your IGN and User ID.");
         return;
     }
+    
+    if (selectedGamesGlobal.isEmpty()) {
+    JOptionPane.showMessageDialog(this, "No games selected!");
+    return;
+}
+    
 
     // Collect selected games
-    List<String> selectedGames = new ArrayList<>();
-    if (MLch.isSelected()) selectedGames.add("Mobile Legends");
-    if (codmch.isSelected()) selectedGames.add("Call of Duty Mobile");
-    if (valoch.isSelected()) selectedGames.add("Valorant");
-    if (pubgch.isSelected()) selectedGames.add("PUBG");
-    if (genshinch.isSelected()) selectedGames.add("Genshin Impact");
-    if (warzonech.isSelected()) selectedGames.add("Call of Duty: Warzone");
-
+    List<String> selectedGames = selectedGamesGlobal;
+    
     // Collect prices only matching the number of selected games
     List<String> selectedPrices = new ArrayList<>();
-    for (int i = 0; i < selectedGames.size(); i++) {
-        switch (i) {
-            case 0: selectedPrices.add((String) GamePrices1.getSelectedItem()); break;
-            case 1: selectedPrices.add((String) GamePrices2.getSelectedItem()); break;
-            case 2: selectedPrices.add((String) GamePrices3.getSelectedItem()); break;
-        }
+
+    for (int i = 0; i < selectedGamesGlobal.size(); i++) {
+    String price = null;
+
+    switch (i) {
+        case 0 -> price = (String) GamePrices1.getSelectedItem();
+        case 1 -> price = (String) GamePrices2.getSelectedItem();
+        case 2 -> price = (String) GamePrices3.getSelectedItem();
+    }
+
+    selectedPrices.add(price);
     }
 
     int total = 0;
@@ -675,14 +677,13 @@ public class OrderDashboard extends javax.swing.JFrame {
     receipt.append("Payment Method: ").append(payment).append("\n\n");
 
 
-    for (int i = 0; i < selectedGames.size(); i++) {
-        String game = selectedGames.get(i);
+    for (int i = 0; i < selectedGamesGlobal.size(); i++) {
+        String game = selectedGamesGlobal.get(i);
         String price = selectedPrices.get(i);
         int amount = extractAmount(price);
         total += amount;
 
-        // Save to file (your method currently saves without price)
-        UserDetailsSaver.saveUserDetails(ign, id, game);
+        saveOrder(ign, game, String.valueOf(amount), payment);
 
         receipt.append("Game: ").append(game).append("\n");
         receipt.append("Selected Price: ").append(price).append("\n\n");
@@ -697,8 +698,8 @@ public class OrderDashboard extends javax.swing.JFrame {
     ReceiptArea.setText(receipt.toString());
 
     // Proceed to Order Summary tab
-    CHECKOUT.setEnabledAt(2, true);
-    CHECKOUT.setSelectedIndex(2);
+    CHECKOUT.setEnabledAt(1, true);
+    CHECKOUT.setSelectedIndex(1);
 
     JOptionPane.showMessageDialog(this, "Finalized! Total: " + total + " PHP");
     }//GEN-LAST:event_finalizeActionPerformed
@@ -710,7 +711,7 @@ public class OrderDashboard extends javax.swing.JFrame {
         IngameName.setText("");
         UserId.setText("");
 
-        // Clear selected checkboxes
+        
         MLch.setSelected(false);
         codmch.setSelected(false);
         genshinch.setSelected(false);
@@ -737,6 +738,41 @@ public class OrderDashboard extends javax.swing.JFrame {
         CHECKOUT.setSelectedIndex(0);
     }
     }//GEN-LAST:event_NewOrderBtnActionPerformed
+
+    private void Proceed2ChooseAmountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Proceed2ChooseAmountActionPerformed
+        System.out.println("Proceed button clicked");
+    
+    String ign = IngameName.getText().trim();
+    String id = UserId.getText().trim();
+    String phone = PhoneNumber.getText().trim();
+    
+    if (ign.isEmpty() || id.isEmpty() || phone.isEmpty()) {
+    JOptionPane.showMessageDialog(this, "Please enter your IGN, User ID, and Phone Number.");
+    return;
+}
+
+      selectedGamesGlobal.clear();
+
+if (MLch.isSelected()) selectedGamesGlobal.add("Mobile Legends");
+if (codmch.isSelected()) selectedGamesGlobal.add("Call of Duty Mobile");
+if (valoch.isSelected()) selectedGamesGlobal.add("Valorant");
+if (pubgch.isSelected()) selectedGamesGlobal.add("PUBG");
+if (genshinch.isSelected()) selectedGamesGlobal.add("Genshin Impact");
+if (warzonech.isSelected()) selectedGamesGlobal.add("Call of Duty Warzone");
+
+    System.out.println("Selected games count: " + selectedGamesGlobal.size());
+
+    if (selectedGamesGlobal.size() <1 || selectedGamesGlobal.size() > 3) {
+        JOptionPane.showMessageDialog(null, "Please select 1 to 3 games only.");
+        return;
+    }
+
+
+    updatePriceComboBoxes(selectedGamesGlobal);
+
+    CHECKOUT.setEnabledAt(1, true);   // enable tab 1
+    CHECKOUT.setSelectedIndex(1);     // switch to tab 1 
+    }//GEN-LAST:event_Proceed2ChooseAmountActionPerformed
     
      private int extractAmount(String priceStr) {
     if (priceStr == null || !priceStr.contains("Php")) return 0;
@@ -777,7 +813,7 @@ public class OrderDashboard extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new OrderDashboard().setVisible(true);
+                new OrderDashboard(1).setVisible(true);
             }
         });
     }
