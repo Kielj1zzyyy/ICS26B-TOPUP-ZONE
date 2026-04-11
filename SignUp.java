@@ -112,6 +112,11 @@ public class SignUp extends javax.swing.JFrame {
                 CreateAcc_ButtonMouseClicked(evt);
             }
         });
+        CreateAcc_Button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CreateAcc_ButtonActionPerformed(evt);
+            }
+        });
 
         jLabel5.setFont(new java.awt.Font("PMingLiU-ExtB", 1, 24)); // NOI18N
         jLabel5.setText("REGISTER NOW ");
@@ -255,6 +260,10 @@ public class SignUp extends javax.swing.JFrame {
         loginFrame.setVisible(true);     // make it visible
         this.dispose(); 
     }//GEN-LAST:event_directToLoginDashboardActionPerformed
+
+    private void CreateAcc_ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CreateAcc_ButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_CreateAcc_ButtonActionPerformed
 
     /**
      * @param args the command line arguments
