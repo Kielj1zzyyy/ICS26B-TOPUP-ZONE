@@ -875,7 +875,7 @@ public class Menu_Dashboard extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Menu_Dashboard().setVisible(true);
+            new Menu_Dashboard(1).setVisible(true);
             }
         });
     }
