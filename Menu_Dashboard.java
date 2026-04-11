@@ -6,10 +6,17 @@ package Group8_Final;
 
 public class Menu_Dashboard extends javax.swing.JFrame {
 
-    public Menu_Dashboard() {
+    private int userId;
+    public Menu_Dashboard(int userId) {
+        this.userId = userId;
         initComponents();
         this.setLocationRelativeTo(null);
     }
+    
+    public Menu_Dashboard() {
+    initComponents();
+    this.setLocationRelativeTo(null);
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -798,43 +805,42 @@ public class Menu_Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1MouseClicked
 
     private void SignOutButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_SignOutButtonMouseClicked
-        LogInDashboard loginFrame = new LogInDashboard();  
-        loginFrame.setVisible(true);     
-        this.dispose();
+        new LogInDashboard().setVisible(true);
+         this.dispose();
     }//GEN-LAST:event_SignOutButtonMouseClicked
 
     private void MlbbButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_MlbbButtonMouseClicked
-        OrderDashboard checkout = new OrderDashboard();
+        OrderDashboard checkout = new OrderDashboard(userId);
         checkout.setVisible(true);
         this.dispose(); 
     }//GEN-LAST:event_MlbbButtonMouseClicked
 
     private void CODMButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_CODMButtonMouseClicked
-        OrderDashboard checkout = new OrderDashboard();
+        OrderDashboard checkout = new OrderDashboard(userId);
         checkout.setVisible(true);
         this.dispose(); 
     }//GEN-LAST:event_CODMButtonMouseClicked
 
     private void GenshinButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_GenshinButtonMouseClicked
-        OrderDashboard checkout = new OrderDashboard();
+        OrderDashboard checkout = new OrderDashboard(userId);
         checkout.setVisible(true);
         this.dispose(); 
     }//GEN-LAST:event_GenshinButtonMouseClicked
 
     private void pubjbuttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pubjbuttonMouseClicked
-        OrderDashboard checkout = new OrderDashboard();
+        OrderDashboard checkout = new OrderDashboard(userId);
         checkout.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_pubjbuttonMouseClicked
 
     private void valorantbuttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_valorantbuttonMouseClicked
-         OrderDashboard checkout = new OrderDashboard();
+         OrderDashboard checkout = new OrderDashboard(userId);
         checkout.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_valorantbuttonMouseClicked
 
     private void warzonebuttonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_warzonebuttonMouseClicked
-         OrderDashboard checkout = new OrderDashboard();
+         OrderDashboard checkout = new OrderDashboard(userId);
         checkout.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_warzonebuttonMouseClicked
