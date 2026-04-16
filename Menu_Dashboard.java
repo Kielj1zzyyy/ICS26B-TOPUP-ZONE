@@ -4,6 +4,10 @@
  */
 package Group8_Final;
 
+import javax.swing.JOptionPane;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
 public class Menu_Dashboard extends javax.swing.JFrame {
 
     private int userId;
@@ -16,6 +20,64 @@ public class Menu_Dashboard extends javax.swing.JFrame {
     public Menu_Dashboard() {
     initComponents();
     this.setLocationRelativeTo(null);
+}
+    
+    private void updateAccount() {
+    String newUsername = JOptionPane.showInputDialog(this, "Enter new username:");
+    if (newUsername == null || newUsername.trim().isEmpty()) return;
+
+    String newPassword = JOptionPane.showInputDialog(this, "Enter new password:");
+    if (newPassword == null || newPassword.trim().isEmpty()) return;
+
+    String query = "UPDATE users SET username=?, password=? WHERE user_id=?";
+
+    try (Connection con = ConnectionDB.getConnection();
+         PreparedStatement pst = con.prepareStatement(query)) {
+
+        pst.setString(1, newUsername.trim());
+        pst.setString(2, newPassword.trim());
+        pst.setInt(3, userId);
+
+        int rows = pst.executeUpdate();
+        if (rows > 0) {
+            JOptionPane.showMessageDialog(this, "Account updated successfully!");
+        } else {
+            JOptionPane.showMessageDialog(this, "Update failed. Try again.");
+        }
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+    }
+}
+
+private void deleteAccount() {
+    int confirm = JOptionPane.showConfirmDialog(this,
+        "Are you sure you want to delete your account?\nThis cannot be undone!",
+        "Confirm Delete",
+        JOptionPane.YES_NO_OPTION,
+        JOptionPane.WARNING_MESSAGE);
+
+    if (confirm != JOptionPane.YES_OPTION) return;
+
+    String query = "DELETE FROM users WHERE user_id=?";
+
+    try (Connection con = ConnectionDB.getConnection();
+         PreparedStatement pst = con.prepareStatement(query)) {
+
+        pst.setInt(1, userId);
+        int rows = pst.executeUpdate();
+
+        if (rows > 0) {
+            JOptionPane.showMessageDialog(this, "Account deleted successfully.");
+            new LogInDashboard().setVisible(true);
+            this.dispose();
+        } else {
+            JOptionPane.showMessageDialog(this, "Delete failed. Try again.");
+        }
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+    }
 }
 
     /**
@@ -100,6 +162,8 @@ public class Menu_Dashboard extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jLabel19 = new javax.swing.JLabel();
+        UpdateAccount = new javax.swing.JButton();
+        DeleteAccount = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -736,25 +800,52 @@ public class Menu_Dashboard extends javax.swing.JFrame {
                 jButton1MouseClicked(evt);
             }
         });
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jLabel19.setBackground(new java.awt.Color(204, 204, 255));
         jLabel19.setFont(new java.awt.Font("Segoe UI Emoji", 1, 14)); // NOI18N
         jLabel19.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Group8_Final/TopUpZone_logo_32x32.png"))); // NOI18N
         jLabel19.setText("TOP UP ZONE");
 
+        UpdateAccount.setBackground(new java.awt.Color(0, 102, 153));
+        UpdateAccount.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
+        UpdateAccount.setForeground(new java.awt.Color(255, 255, 255));
+        UpdateAccount.setText("Update Account");
+        UpdateAccount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                UpdateAccountActionPerformed(evt);
+            }
+        });
+
+        DeleteAccount.setBackground(new java.awt.Color(0, 102, 153));
+        DeleteAccount.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
+        DeleteAccount.setForeground(new java.awt.Color(255, 255, 255));
+        DeleteAccount.setText("Delete Account");
+        DeleteAccount.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DeleteAccountActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(16, 16, 16)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(UpdateAccount, javax.swing.GroupLayout.DEFAULT_SIZE, 149, Short.MAX_VALUE)
+                    .addComponent(DeleteAccount, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -763,7 +854,11 @@ public class Menu_Dashboard extends javax.swing.JFrame {
                 .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(UpdateAccount, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(DeleteAccount, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(15, 15, 15))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -776,7 +871,7 @@ public class Menu_Dashboard extends javax.swing.JFrame {
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, 0)
+                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(MainDashboard))))
@@ -845,6 +940,18 @@ public class Menu_Dashboard extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_warzonebuttonMouseClicked
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void UpdateAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdateAccountActionPerformed
+        updateAccount();
+    }//GEN-LAST:event_UpdateAccountActionPerformed
+
+    private void DeleteAccountActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DeleteAccountActionPerformed
+       deleteAccount();
+    }//GEN-LAST:event_DeleteAccountActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -883,12 +990,14 @@ public class Menu_Dashboard extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton CODMButton;
     private javax.swing.JLabel DETAILS;
+    private javax.swing.JButton DeleteAccount;
     private javax.swing.JLabel Details2;
     private javax.swing.JButton GenshinButton;
     private javax.swing.JPanel HOMEPAGE;
     private javax.swing.JTabbedPane MainDashboard;
     private javax.swing.JButton MlbbButton;
     private javax.swing.JButton SignOutButton;
+    private javax.swing.JButton UpdateAccount;
     private javax.swing.JPanel aboutUs;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
